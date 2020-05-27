@@ -1,0 +1,144 @@
+# Importing packages
+import datetime
+import glob
+import os
+import time
+from idlelib import browser
+from shutil import copyfile, copy
+from telnetlib import EC
+
+import row as row
+from selenium import webdriver
+import pandas as pd
+from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+# Go to the website
+
+driver = webdriver.Chrome('C:/Users/sagar.doshi/Desktop/Analysis/chromedriver.exe')
+driver.get('https://auth2.comscore.com/Login.aspx')
+
+# default download location
+# chrome_options = webdriver.ChromeOptions()
+# pref = {"download.default_directory": r"C:\Users\sagar.doshi\Desktop\Comscore\Brand",
+#        "download.directory_upgrade": True,
+#        "download.prompt_for_download": False,
+#        "safebrowsing.enabled": True}
+# chrome_options.add_experimental_option("pref", pref)
+
+# Enter Credentials
+username = driver.find_element(By.ID, "unameTbx")
+username.send_keys("mei_sdoshi")
+password = driver.find_element(By.ID, "__pwdTbx")
+time.sleep(2)
+password.send_keys("WMikea009")
+sign_in = driver.find_element(By.ID, "LoginBtn")
+sign_in.click()
+time.sleep(3)
+
+# Next page
+dropdwn = driver.find_element_by_xpath("//button[contains(@class,'btn dropdown-btn product-title')]")
+time.sleep(2)
+dropdwn.click()
+
+AdEffx = driver.find_element_by_xpath("//a[contains(text(),'AdEffx')]")
+time.sleep(2)
+AdEffx.click()
+time.sleep(10)
+
+# Next page
+
+# Switching to the last opened page
+driver.window_handles
+driver.switch_to.window(driver.window_handles[-1])
+
+# Now clicking on the Brand
+Brand = driver.find_element_by_xpath("//table/tbody/tr[contains(@id,'gridview-1021-record-ext-record-3')]")
+Brand.click()
+
+# alternative
+# driver.window_handles
+# driver.switch_to.window(driver.window_handles[-1])
+# wait = WebDriverWait(driver, 60)
+# Brand = wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/div/div[2]/div/div/div[2]/div[2]/div/table/tbody/tr[1]")))
+# Brand.click()
+
+# Opening the survey
+time.sleep(25)
+BrandSurvey = driver.find_element_by_xpath("//a[contains(text(),'Brand Survey Lift LongForm T/C Report')]")
+time.sleep(3)
+BrandSurvey.click()
+
+# Switching to the Brand Tab
+time.sleep(10)
+# brnd_tab = driver.find_element_by_xpath("//a[contains(text(),'WMG | IKEA Brand Love Consideration')]")
+brnd_tab = driver.find_element_by_xpath("/html/body/div/div[1]/div[1]/div[2]/div/a[5]/span[1]/span/span[1]")
+time.sleep(3)
+brnd_tab.click()
+time.sleep(3)
+
+# Find frame or iframe and switch
+wait = WebDriverWait(driver, 23)
+wait.until(
+    EC.frame_to_be_available_and_switch_to_it(driver.find_element_by_xpath("//*[@id='panel-1077-innerCt']/iframe")))
+# selecting the date
+time.sleep(4)
+x_date = driver.find_element_by_xpath("//*[@id='ext-gen1083']")
+time.sleep(3)
+x_date.click()
+time.sleep(3)
+todaybutton = driver.find_element_by_xpath("//*[@id='button-1167-btnIconEl']")
+todaybutton.click()
+# download the file
+download = driver.find_element_by_xpath("//*[@id='button-1020-btnIconEl']")
+latest_file_time = time.ctime(time.time())
+print(latest_file_time)
+download.click()
+time.sleep(6)
+# driver.switch_to().defaultContent()
+
+# finding the file and copying it
+while True:
+    list_of_files = glob.glob("C:/Users/sagar.doshi/Downloads/*")
+    latest_file = max(list_of_files, key=os.path.getctime)
+    print(latest_file)
+    print("-----------")
+    file_name = latest_file.split("\\", 1)[1]
+    print(file_name)
+    file_path = "C:/Users/sagar.doshi/Downloads/" + file_name
+    print(file_path)
+    print("file path found")
+    print("------------------------------")
+    time.sleep(3)
+    if time.ctime(os.path.getctime(file_path)) > latest_file_time:
+        print("Found the file")
+        break
+    else:
+        time.sleep(3)
+        continue
+print("------------------------------")
+print(file_path)
+print("Copying the file")
+# Copying file to Teams
+copy(file_path,
+     r"C:\Users\sagar.doshi\insidemedia.net\WM USA - IKEA - Reporting - Cross-Campaign Documents (1)\Comscore Data")
+print("------------------------------")
+print("File Copied to Teams :)")
+time.sleep(3)
+
+list_of_files = glob.glob(
+    "C:/Users/sagar.doshi/insidemedia.net/WM USA - IKEA - Reporting - Cross-Campaign Documents (1)/Comscore Data/*")
+print("Retriving latest file from Teams")
+latest_file = max(list_of_files, key=os.path.getctime)
+time.sleep(3)
+print(latest_file)
+print("-----------")
+team_filename = latest_file.split("\\", 1)[1]
+print(team_filename)
+dt = str(datetime.date.today().isoformat())
+new_name = "Brand " + dt + ".xls"
+print(new_name)
+os.rename(r'C:/Users/sagar.doshi/insidemedia.net/WM USA - IKEA - Reporting - Cross-Campaign Documents (1)/Comscore Data/'+team_filename, r'C:/Users/sagar.doshi/insidemedia.net/WM USA - IKEA - Reporting - Cross-Campaign Documents (1)/Comscore Data/' + new_name)
+
